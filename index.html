@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Crypto RSI Backtester</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <header class="header">
+        <div>
+          <div class="eyebrow">Quant Research Lab</div>
+          <h1>Crypto RSI Backtester</h1>
+          <p class="subtitle">
+            Test RSI-driven strategies with realistic fees, slippage, and
+            long/short support.
+          </p>
+        </div>
+        <div class="status">
+          <span class="status-pill" id="statusPill">Idle</span>
+          <span class="status-text" id="statusText">Ready to run a backtest</span>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="panel">
+          <form id="backtestForm" class="form">
+            <div class="field span-2">
+              <label for="runMode">Run Mode</label>
+              <select id="runMode">
+                <option value="backtest" selected>Backtest</option>
+                <option value="optimize">Optimize</option>
+                <option value="walkforward">Walk-Forward</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="symbol">Crypto Pair</label>
+              <select id="symbol"></select>
+            </div>
+            <div class="field">
+              <label for="timeframe">Timeframe</label>
+              <select id="timeframe"></select>
+            </div>
+            <div class="field">
+              <label for="start">Start</label>
+              <input id="start" type="datetime-local" />
+            </div>
+            <div class="field">
+              <label for="end">End</label>
+              <input id="end" type="datetime-local" />
+            </div>
+            <div class="field">
+              <label for="rsiPeriod">RSI Period</label>
+              <input id="rsiPeriod" type="number" min="2" value="14" />
+            </div>
+            <div class="field">
+              <label for="rsiLower">RSI Buy Level</label>
+              <input id="rsiLower" type="number" min="1" max="99" value="30" />
+            </div>
+            <div class="field">
+              <label for="rsiUpper">RSI Sell Level</label>
+              <input id="rsiUpper" type="number" min="1" max="99" value="70" />
+            </div>
+            <div class="field">
+              <label for="mode">Signal Mode</label>
+              <select id="mode">
+                <option value="threshold">Threshold</option>
+                <option value="crossing">Crossing</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="slopeLookback">RSI Slope Lookback</label>
+              <input id="slopeLookback" type="number" min="1" value="5" />
+            </div>
+            <div class="field">
+              <label for="slopeMin">Slope Min (Buy)</label>
+              <input id="slopeMin" type="number" step="0.1" placeholder="Optional" />
+            </div>
+            <div class="field">
+              <label for="slopeMax">Slope Max (Sell)</label>
+              <input id="slopeMax" type="number" step="0.1" placeholder="Optional" />
+            </div>
+            <div class="field">
+              <label for="divergence">Use RSI Divergence</label>
+              <select id="divergence">
+                <option value="false" selected>No</option>
+                <option value="true">Yes</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="divLookback">Divergence Lookback</label>
+              <input id="divLookback" type="number" min="5" value="20" />
+            </div>
+            <div class="field">
+              <label for="initialCapital">Initial Capital</label>
+              <input id="initialCapital" type="number" min="100" value="10000" />
+            </div>
+            <div class="field">
+              <label for="feeRate">Fee Rate</label>
+              <input id="feeRate" type="number" step="0.0001" value="0.001" />
+            </div>
+            <div class="field">
+              <label for="slippage">Slippage (bps)</label>
+              <input id="slippage" type="number" step="1" value="5" />
+            </div>
+            <div class="field">
+              <label for="allowShort">Allow Shorts</label>
+              <select id="allowShort">
+                <option value="true" selected>Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="maxCandles">Max Candles</label>
+              <input id="maxCandles" type="number" min="100" value="2000" />
+            </div>
+            <div class="advanced" id="optimizationFields">
+              <div class="field">
+                <label for="optPeriods">RSI Periods</label>
+                <input id="optPeriods" type="text" value="10,14,21" />
+              </div>
+              <div class="field">
+                <label for="optLowers">Lower Levels</label>
+                <input id="optLowers" type="text" value="20,30,40" />
+              </div>
+              <div class="field">
+                <label for="optUppers">Upper Levels</label>
+                <input id="optUppers" type="text" value="60,70,80" />
+              </div>
+              <div class="field">
+                <label for="optObjective">Objective</label>
+                <select id="optObjective">
+                  <option value="total_return" selected>Total Return</option>
+                  <option value="sharpe_ratio">Sharpe</option>
+                  <option value="max_drawdown">Max Drawdown</option>
+                  <option value="profit_factor">Profit Factor</option>
+                  <option value="expectancy">Expectancy</option>
+                  <option value="kelly_criterion">Kelly</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="optTopN">Top Results</label>
+                <input id="optTopN" type="number" min="1" value="10" />
+              </div>
+            </div>
+            <div class="advanced" id="walkforwardFields">
+              <div class="field">
+                <label for="wfTrain">Train Candles</label>
+                <input id="wfTrain" type="number" min="50" value="500" />
+              </div>
+              <div class="field">
+                <label for="wfTest">Test Candles</label>
+                <input id="wfTest" type="number" min="20" value="200" />
+              </div>
+              <div class="field">
+                <label for="wfStep">Step Candles</label>
+                <input id="wfStep" type="number" min="20" value="200" />
+              </div>
+              <div class="field">
+                <label for="wfCarry">Carry Capital</label>
+                <select id="wfCarry">
+                  <option value="true" selected>Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+            </div>
+            <button id="runBacktest" class="primary" type="submit">Run Backtest</button>
+          </form>
+
+          <div class="metrics">
+            <div class="metric">
+              <span>Total Return</span>
+              <strong id="metricReturn">-</strong>
+            </div>
+            <div class="metric">
+              <span>Win Rate</span>
+              <strong id="metricWinRate">-</strong>
+            </div>
+            <div class="metric">
+              <span>Sharpe Ratio</span>
+              <strong id="metricSharpe">-</strong>
+            </div>
+            <div class="metric">
+              <span>Max Drawdown</span>
+              <strong id="metricDrawdown">-</strong>
+            </div>
+            <div class="metric">
+              <span>Profit Factor</span>
+              <strong id="metricProfitFactor">-</strong>
+            </div>
+            <div class="metric">
+              <span>Expectancy</span>
+              <strong id="metricExpectancy">-</strong>
+            </div>
+            <div class="metric">
+              <span>Kelly</span>
+              <strong id="metricKelly">-</strong>
+            </div>
+            <div class="metric">
+              <span>Trades</span>
+              <strong id="metricTrades">-</strong>
+            </div>
+          </div>
+          <div class="results" id="resultsPanel">
+            <div class="results-title">Run Results</div>
+            <div class="results-body" id="resultsBody">Run a backtest to see details.</div>
+          </div>
+        </section>
+
+        <section class="charts">
+          <div class="chart-card">
+            <div class="chart-title">Price + Trades</div>
+            <div id="priceChart" class="chart chart--price"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">RSI</div>
+            <div id="rsiChart" class="chart chart--rsi"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Equity Curve</div>
+            <div id="equityChart" class="chart chart--equity"></div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div>Built for rapid RSI research. Connect a backend at <code>/api/backtest</code>.</div>
+      </footer>
+    </div>
+
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
