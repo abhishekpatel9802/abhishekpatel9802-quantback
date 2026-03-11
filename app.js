@@ -129,6 +129,10 @@ function setStatus(state, text) {
 }
 
 function initCharts() {
+  if (typeof LightweightCharts === "undefined") {
+    setStatus("Error", "Chart library failed to load. Check your network or CSP.");
+    return;
+  }
   const commonOptions = {
     layout: {
       background: { color: "#151b21" },
@@ -175,6 +179,12 @@ function initCharts() {
     rsiChart.applyOptions({ width: rsiContainer.clientWidth });
     equityChart.applyOptions({ width: equityContainer.clientWidth });
   });
+
+  setTimeout(() => {
+    priceChart.applyOptions({ width: priceContainer.clientWidth });
+    rsiChart.applyOptions({ width: rsiContainer.clientWidth });
+    equityChart.applyOptions({ width: equityContainer.clientWidth });
+  }, 0);
 }
 
 function populateSelect(select, values) {
