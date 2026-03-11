@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8000";
+const API_BASE = "";
 const DEFAULT_PAIRS = [
   "BTCUSDT",
   "ETHUSDT",
@@ -16,6 +16,7 @@ const DEFAULT_TIMEFRAMES = ["1m", "5m", "15m", "1h", "4h", "1d"];
 const elements = {
   form: document.getElementById("backtestForm"),
   runMode: document.getElementById("runMode"),
+  apiBase: document.getElementById("apiBase"),
   symbol: document.getElementById("symbol"),
   timeframe: document.getElementById("timeframe"),
   start: document.getElementById("start"),
@@ -79,6 +80,19 @@ function parseList(value, parser) {
     .filter((item) => item.length > 0)
     .map((item) => parser(item))
     .filter((item) => !Number.isNaN(item));
+}
+
+function normalizeApiBase(value) {
+  if (!value) return "";
+  return value.replace(/\/+$/, "");
+}
+
+function getApiBase() {
+  const inputValue = elements.apiBase?.value?.trim() ?? "";
+  if (inputValue) {
+    return normalizeApiBase(inputValue);
+  }
+  return API_BASE;
 }
 
 function setMode(mode) {
@@ -164,8 +178,9 @@ function initCharts() {
 }
 
 function populateSelect(select, values) {
+  const safeValues = values && values.length ? values : select === elements.symbol ? DEFAULT_PAIRS : DEFAULT_TIMEFRAMES;
   select.innerHTML = "";
-  values.forEach((value) => {
+  safeValues.forEach((value) => {
     const option = document.createElement("option");
     option.value = value;
     option.textContent = value;
@@ -175,9 +190,10 @@ function populateSelect(select, values) {
 
 async function loadOptions() {
   try {
+    const base = getApiBase();
     const [pairsRes, timeframeRes] = await Promise.all([
-      fetch(`${API_BASE}/api/pairs`),
-      fetch(`${API_BASE}/api/timeframes`),
+      fetch(`${base}/api/pairs`),
+      fetch(`${base}/api/timeframes`),
     ]);
 
     const pairs = pairsRes.ok ? await pairsRes.json() : DEFAULT_PAIRS;
@@ -429,7 +445,8 @@ async function runBacktest(event) {
       payload = buildWalkforwardPayload();
     }
 
-    const response = await fetch(`${API_BASE}${endpoint}`, {
+    const base = getApiBase();
+    const response = await fetch(`${base}${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -465,4 +482,23 @@ setDefaultDates();
 
 elements.form.addEventListener("submit", runBacktest);
 elements.runMode.addEventListener("change", (event) => setMode(event.target.value));
+if (elements.apiBase) {
+  try {
+    const savedBase = localStorage.getItem("apiBase");
+    if (savedBase) {
+      elements.apiBase.value = savedBase;
+    }
+  } catch (error) {
+    // Ignore storage errors (e.g., private mode).
+  }
+  elements.apiBase.addEventListener("change", (event) => {
+    const normalized = normalizeApiBase(event.target.value.trim());
+    try {
+      localStorage.setItem("apiBase", normalized);
+    } catch (error) {
+      // Ignore storage errors.
+    }
+    loadOptions();
+  });
+}
 setMode(elements.runMode.value);
