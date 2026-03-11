@@ -179,6 +179,9 @@ function initCharts() {
 
 function populateSelect(select, values) {
   const safeValues = values && values.length ? values : select === elements.symbol ? DEFAULT_PAIRS : DEFAULT_TIMEFRAMES;
+  if (!safeValues || safeValues.length === 0) {
+    return;
+  }
   select.innerHTML = "";
   safeValues.forEach((value) => {
     const option = document.createElement("option");

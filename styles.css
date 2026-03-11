@@ -144,6 +144,9 @@ h1 {
   font-size: 14px;
   outline: none;
   min-height: 42px;
+  position: relative;
+  z-index: 3;
+  pointer-events: auto;
 }
 
 .field input:focus,
