@@ -139,6 +139,13 @@ Apply the schema in `backend/db/schema.sql` to create the TimescaleDB tables for
 - `BINANCE_BASE_URL` if you need a proxy or a custom API base
 - `MAX_CANDLES` to clamp ingestion size
 
+## Deployment (Backend on Render)
+1. Create a new Render Web Service from this GitHub repo.
+2. Render will read `render.yaml` and use:
+   - Build: `pip install -r backend/requirements.txt`
+   - Start: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+3. After deploy, copy the Render URL and paste it into the UI `API URL` field.
+
 ## Notes
 - Binance data is fetched via `/api/v3/klines`.
 - RSI is computed manually using Wilder’s smoothing.
