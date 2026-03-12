@@ -63,13 +63,16 @@ async def timeframes():
 async def backtest(request: BacktestRequest):
     max_candles = min(request.max_candles, MAX_CANDLES)
 
-    candles = data_engine.get_candles(
-        symbol=request.symbol,
-        timeframe=request.timeframe,
-        start=request.start,
-        end=request.end,
-        max_candles=max_candles,
-    )
+    try:
+        candles = data_engine.get_candles(
+            symbol=request.symbol,
+            timeframe=request.timeframe,
+            start=request.start,
+            end=request.end,
+            max_candles=max_candles,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     if len(candles) < request.strategy.rsi_period + 5:
         raise HTTPException(status_code=400, detail="Not enough candles for RSI period")
@@ -106,13 +109,16 @@ async def backtest(request: BacktestRequest):
 @app.post("/api/optimize", response_model=OptimizationResult)
 async def optimize(request: OptimizationRequest):
     max_candles = min(request.max_candles, MAX_CANDLES)
-    candles = data_engine.get_candles(
-        symbol=request.symbol,
-        timeframe=request.timeframe,
-        start=request.start,
-        end=request.end,
-        max_candles=max_candles,
-    )
+    try:
+        candles = data_engine.get_candles(
+            symbol=request.symbol,
+            timeframe=request.timeframe,
+            start=request.start,
+            end=request.end,
+            max_candles=max_candles,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     if len(candles) < request.optimization.rsi_periods[0] + 5:
         raise HTTPException(status_code=400, detail="Not enough candles for optimization")
@@ -162,13 +168,16 @@ async def optimize(request: OptimizationRequest):
 @app.post("/api/walkforward", response_model=WalkForwardResult)
 async def walkforward(request: WalkForwardRequest):
     max_candles = min(request.max_candles, MAX_CANDLES)
-    candles = data_engine.get_candles(
-        symbol=request.symbol,
-        timeframe=request.timeframe,
-        start=request.start,
-        end=request.end,
-        max_candles=max_candles,
-    )
+    try:
+        candles = data_engine.get_candles(
+            symbol=request.symbol,
+            timeframe=request.timeframe,
+            start=request.start,
+            end=request.end,
+            max_candles=max_candles,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     wf = request.walkforward
     if len(candles) < wf.train_candles + wf.test_candles:

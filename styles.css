@@ -171,6 +171,29 @@ h1 {
   color: var(--muted);
 }
 
+.api-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  cursor: pointer;
+  min-height: 42px;
+}
+
+.ghost:hover {
+  border-color: rgba(255, 176, 32, 0.5);
+  color: var(--accent);
+}
+
 .field label {
   letter-spacing: 0.04em;
   text-transform: uppercase;

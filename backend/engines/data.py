@@ -157,10 +157,19 @@ class DataEngine:
             params["startTime"] = start_ms
         if end_ms is not None:
             params["endTime"] = end_ms
-
-        response = httpx.get(f"{self.base_url}/api/v3/klines", params=params, timeout=30)
-        response.raise_for_status()
-        data = response.json()
+        try:
+            response = httpx.get(
+                f"{self.base_url}/api/v3/klines",
+                params=params,
+                timeout=30,
+                headers={"User-Agent": "Mozilla/5.0"},
+            )
+            response.raise_for_status()
+            data = response.json()
+        except httpx.HTTPError as exc:
+            raise RuntimeError(f"Binance request failed: {exc}") from exc
+        except Exception as exc:
+            raise RuntimeError("Binance request failed") from exc
         return [_parse_kline(item) for item in data]
 
     def get_candles(

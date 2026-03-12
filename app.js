@@ -17,6 +17,8 @@ const elements = {
   form: document.getElementById("backtestForm"),
   runMode: document.getElementById("runMode"),
   apiBase: document.getElementById("apiBase"),
+  testApi: document.getElementById("testApi"),
+  apiHint: document.getElementById("apiHint"),
   symbol: document.getElementById("symbol"),
   timeframe: document.getElementById("timeframe"),
   start: document.getElementById("start"),
@@ -128,6 +130,12 @@ function setStatus(state, text) {
   }
 }
 
+function setApiHint(message, isError = false) {
+  if (!elements.apiHint) return;
+  elements.apiHint.textContent = message;
+  elements.apiHint.style.color = isError ? "#ff8a8a" : "var(--muted)";
+}
+
 function initCharts() {
   if (typeof LightweightCharts === "undefined") {
     setStatus("Error", "Chart library failed to load. Check your network or CSP.");
@@ -225,7 +233,7 @@ async function loadOptions() {
 
 function setDefaultDates() {
   const now = new Date();
-  const start = new Date(now.getTime() - 1000 * 60 * 60 * 24 * 30);
+  const start = new Date(now.getTime() - 1000 * 60 * 60 * 24 * 14);
   elements.start.value = start.toISOString().slice(0, 16);
   elements.end.value = now.toISOString().slice(0, 16);
 }
@@ -489,6 +497,30 @@ async function runBacktest(event) {
   }
 }
 
+async function testApiConnection() {
+  const base = getApiBase();
+  if (!base) {
+    setApiHint("Using same-origin /api/* routes.", false);
+    return;
+  }
+  try {
+    setApiHint("Testing API connection...", false);
+    const response = await fetch(`${base}/api/health`);
+    if (!response.ok) {
+      setApiHint(`API responded with ${response.status}`, true);
+      return;
+    }
+    const data = await response.json();
+    if (data.status === "ok") {
+      setApiHint("API is reachable.", false);
+    } else {
+      setApiHint("API responded, but status is unexpected.", true);
+    }
+  } catch (error) {
+    setApiHint("API unreachable. Check the URL or backend logs.", true);
+  }
+}
+
 initCharts();
 loadOptions();
 setDefaultDates();
@@ -514,6 +546,11 @@ if (elements.apiBase) {
       // Ignore storage errors.
     }
     loadOptions();
+    testApiConnection();
   });
 }
+if (elements.testApi) {
+  elements.testApi.addEventListener("click", testApiConnection);
+}
 setMode(elements.runMode.value);
+testApiConnection();
