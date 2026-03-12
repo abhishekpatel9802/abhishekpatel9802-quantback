@@ -1,4 +1,4 @@
-const API_BASE = "";
+const API_BASE = "https://abhishekpatel9802-quantback.onrender.com";
 const DEFAULT_PAIRS = [
   "BTCUSDT",
   "ETHUSDT",
@@ -500,6 +500,8 @@ if (elements.apiBase) {
     const savedBase = localStorage.getItem("apiBase");
     if (savedBase) {
       elements.apiBase.value = savedBase;
+    } else if (API_BASE) {
+      elements.apiBase.value = API_BASE;
     }
   } catch (error) {
     // Ignore storage errors (e.g., private mode).
